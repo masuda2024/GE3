@@ -1320,6 +1320,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	//三角形2個
 	/*
+	    []
+	   [][]
+	  [][][]
+	 [][][][]
+	[][][][][]
+
+
+
+
+
+
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
 
 
