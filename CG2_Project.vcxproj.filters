@@ -75,6 +75,6 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Object3d.hlsli" />
+    <None Include="resources\Shaders\Object3d.hlsli" />
   </ItemGroup>
 </Project>
