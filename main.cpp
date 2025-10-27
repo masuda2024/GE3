@@ -36,6 +36,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #pragma comment(lib, "dinput8.lib")
 
+#include"Input.h"
+
 
 
 #pragma region 構造体
@@ -107,6 +109,7 @@ struct ModelData
 };
 
 #pragma endregion
+
 
 #pragma region 行列
 
@@ -328,6 +331,7 @@ Matrix4x4 MakeOethographicMatrix(float left, float top, float right, float botto
 #pragma endregion
 
 
+#pragma region 文字列変換
 
 std::wstring ConverString(const std::string& str)
 {
@@ -369,13 +373,36 @@ std::string ConverString(const std::wstring& str)
 
 }
 
+std::wstring ConvertString(const std::string& str)
+{
+	if (str.empty())
+	{
+		return std::wstring();
+	}
+
+	auto sizeNeeded = MultiByteToWideChar
+	(
+		CP_UTF8, 0,
+		reinterpret_cast<const char*>(&str[0]), static_cast<int>
+		(str.size()), NULL, 0
+	);
+	if (sizeNeeded == 0)
+	{
+		return std::wstring();
+	}
+	std::wstring result(sizeNeeded, 0);
+	MultiByteToWideChar
+	(
+		CP_UTF8, 0, reinterpret_cast<const char*>(&str[0]),
+		static_cast<int>(str.size()), &result[0], sizeNeeded
+	);
+	return result;
+}
+
+#pragma endregion 文字列変換
 
 
-
-
-////////////////////////////////////////////
-
-
+#pragma region D3D12関連ヘルパー関数
 
 //Resource作成
 ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
@@ -422,50 +449,6 @@ ID3D12DescriptorHeap* CreateDescriptorHeap(
 	return descriptorHeap;
 }
 
-
-void Log(const std::string& message)
-{
-	OutputDebugStringA(message.c_str());
-}
-
-
-
-void Log(const std::wstring& message)
-{
-	OutputDebugStringW(message.c_str());
-}
-
-
-
-std::wstring ConvertString(const std::string& str)
-{
-	if (str.empty())
-	{
-		return std::wstring();
-	}
-
-	auto sizeNeeded = MultiByteToWideChar
-	(
-		CP_UTF8, 0,
-		reinterpret_cast<const char*>(&str[0]), static_cast<int>
-		(str.size()), NULL, 0
-	);
-	if (sizeNeeded == 0)
-	{
-		return std::wstring();
-	}
-	std::wstring result(sizeNeeded, 0);
-	MultiByteToWideChar
-	(
-		CP_UTF8, 0, reinterpret_cast<const char*>(&str[0]),
-		static_cast<int>(str.size()), &result[0], sizeNeeded
-	);
-	return result;
-}
-
-
-
-
 //DepthStencilTexureを作る
 ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height)
 {
@@ -509,8 +492,26 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 	return resource;
 }
 
+#pragma endregion D3D12関連ヘルパー関数
 
 
+#pragma region ログ出力関数
+
+void Log(const std::string& message)
+{
+	OutputDebugStringA(message.c_str());
+}
+
+
+
+void Log(const std::wstring& message)
+{
+	OutputDebugStringW(message.c_str());
+}
+
+
+
+#pragma endregion ログ出力関数
 
 IDxcBlob* CompileShader
 (
@@ -589,6 +590,8 @@ IDxcBlob* CompileShader
 	return shaderBlob;
 }
 
+
+#pragma region テクスチャ読み込み関連関数
 
 //1.Textureデータを書き込む
 DirectX::ScratchImage LoadTexture(const std::string& filePath)
@@ -711,8 +714,6 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 
 
-
-
 //obj構造体と読み込み関数
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename)
 {
@@ -812,6 +813,8 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	return modelData;
 }
 
+#pragma endregion テクスチャ読み込み関連関数
+
 
 //ウインドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
@@ -855,8 +858,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
-
-#pragma region ウインドウズ初期化
+//初期化
+#pragma region ウインドウ作成
 
 
 	WNDCLASS wc{};
@@ -902,7 +905,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
 
-#pragma endregion
+
 
 
 
@@ -917,6 +920,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		debugController->SetEnableGPUBasedValidation(TRUE);
 	}
 #endif // _DEBUG
+
+
+#pragma endregion ウインドウ作成
+
+
+#pragma region DirectX初期化
+
 
 	//DXGIファクトリーの生成
 	IDXGIFactory7* dxgiFactory = nullptr;
@@ -1007,6 +1017,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
      #endif // DEBUG
 
+
+#pragma endregion DirectX初期化
+
+
+#pragma region 汎用機能初期化
 
 	//コマンドキューを生成する
 	ID3D12CommandQueue* commandQueue = nullptr;
@@ -1286,7 +1301,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
+
+
+
+
+#pragma endregion 汎用機能初期化
+
+
 #pragma region 入力デバイス初期化
+	/*
 	//DirectInputの初期化
 	IDirectInput8* directInput = nullptr;
 	hr = DirectInput8Create
@@ -1319,16 +1342,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE
 	);
 	assert(SUCCEEDED(hr));
+    */
+
+	//ポインタ
+	Input* input = nullptr;
+	//入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance,hwnd);
+#pragma endregion 入力デバイス初期化
 
 
-#pragma endregion
 
 
 
+#pragma region 画面に表示させるリソース
 
-
-
-	
 #pragma region 三角形2個
 	/*
 	    []
@@ -1420,41 +1448,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//今回は白を書き込んでみる
 	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
-
-
-
-
-
-
-
-
-	//////////////////////////////////////////////////
-	
-	////////////////////
-	
-	
-	
-	
-	
-	
-	
-	/**/
-	
-	
-	
-	
-	
-	
-	///////////////////////
-	
-	//////////////////////////////////////////////////////////////////
-
-
-	
-
-
-
 
 
 
@@ -1645,6 +1638,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	BYTE prekey[256] = {};
 
 	//メインループ
+#pragma endregion 画面に表示させるリソース
+
+
+
+
+
+#pragma region メインループ
+
 	MSG msg{};
 	while (msg.message != WM_QUIT)
 	{
@@ -1655,13 +1656,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			DispatchMessage(&msg);
 		} else
 		{
+			/*
 			//キーボード入力情報取得開始
 			keyboard->Acquire();
 			//前の入力を保存
 			memcpy(prekey, key, 256);
 			//最新の入力を保存
 			keyboard->GetDeviceState(sizeof(key), key);
-
+*/
 
 
 			//開発用UIの処理開始
@@ -1670,6 +1672,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			ImGui::NewFrame();
 			
 			
+			/*
+			if (input->TriggerKey(DIK_SPACE))
+			{
+				OutputDebugStringA("Trigger SPACE\n");
+			}
+
+			if(input->PushKey(DIK_SPACE))
+			{
+				OutputDebugStringA("Press SPACE\n");
+			}*/
+
+
+
 			
 			if (key[DIK_LEFT] && !prekey[DIK_LEFT])
 			{
@@ -1677,6 +1692,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			
 			
+
+
 			//UI
 			ImGui::Begin("Settings");
 			ImGui::ColorEdit4("material", &materialData->x, ImGuiColorEditFlags_AlphaPreview);
@@ -1923,22 +1940,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 	}
 
-	Log(ConverString(std::format(L"WSTRING{}\n", L"abc")));
+#pragma endregion メインループ
+
+
+
 	
+
+#pragma region 解放処理
+
+
+
+	Log(ConverString(std::format(L"WSTRING{}\n", L"abc")));
+
 	return 0;
 
 
-	
+
 
 	CloseHandle(fenceEvent);
-	
+
 	//ImGuiの終了処理。詳細はさして重要ではないので解説は省略する
 	//初期化と逆順に行う
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-#pragma region リリース
+
 
 	indexResourceSprite->Release();
 	transformationMatrixResourceSprite->Release();
@@ -1974,15 +2001,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	useAdapter->Release();
 	dxgiFactory->Release();
 	
-	
-#pragma endregion
-	
-	
+
+	//入力解放
+	delete input;
 
 #ifdef _DEBUG
 	debugController->Release();
 #endif // _DEBUG
 	CloseWindow(hwnd);
+
+
+#pragma endregion 解放処理
+	
+	
+
+
 
 	//警告時に止まる
 	// デバッグの時だけ使う
