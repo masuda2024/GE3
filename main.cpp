@@ -38,6 +38,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #include"Input.h"
 
+#include<Windows.h>
+
 
 
 #pragma region 構造体
@@ -1343,8 +1345,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	);
 	assert(SUCCEEDED(hr));
     */
-
 	
+	
+	//ポインタ
+	Input* input = nullptr;
+	
+
+	//入力の初期化
+	input = new Input();
+	input->Initialize(wc.hInstance,hwnd);
+
+
 #pragma endregion 入力デバイス初期化
 
 
@@ -1668,13 +1679,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 			
-			
-			/*
+
+			input->Update();
+
+			/**/
 			if (input->TriggerKey(DIK_SPACE))
 			{
 				OutputDebugStringA("Trigger SPACE\n");
 			}
-
+			/*
 			if(input->PushKey(DIK_SPACE))
 			{
 				OutputDebugStringA("Press SPACE\n");
@@ -1683,13 +1696,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 			
+			
+			
 			if (key[DIK_LEFT] && !prekey[DIK_LEFT])
 			{
 				OutputDebugStringA("Press SPACE\n");
 			}
-			
-			
-
 
 			//UI
 			ImGui::Begin("Settings");
@@ -1999,6 +2011,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	dxgiFactory->Release();
 	
 
+	//入力解放
+	delete input;
 
 
 #ifdef _DEBUG
