@@ -1344,11 +1344,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	assert(SUCCEEDED(hr));
     */
 
-	//ポインタ
-	Input* input = nullptr;
-	//入力の初期化
-	input = new Input();
-	input->Initialize(wc.hInstance,hwnd);
+	
 #pragma endregion 入力デバイス初期化
 
 
@@ -1663,8 +1659,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			memcpy(prekey, key, 256);
 			//最新の入力を保存
 			keyboard->GetDeviceState(sizeof(key), key);
-*/
-
+　　　　　　*/
+			
+	       
 
 			//開発用UIの処理開始
 			ImGui_ImplDX12_NewFrame();
@@ -2002,8 +1999,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	dxgiFactory->Release();
 	
 
-	//入力解放
-	delete input;
+
 
 #ifdef _DEBUG
 	debugController->Release();
