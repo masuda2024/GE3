@@ -14,7 +14,7 @@
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
-#pragma comment(lib,"dxguid.lib")
+
 #include <dxcapi.h>
 #pragma comment(lib, "dxcompiler.lib")
 
@@ -34,7 +34,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #define DIRECTINPUT_VERSION 0x0800// DirectInput8のバージョン指定
 #include <dinput.h>
 
-#pragma comment(lib, "dinput8.lib")
+
 
 #include"Input.h"
 
