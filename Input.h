@@ -3,6 +3,7 @@
 #include<wrl.h>
 #define DIRECTINPUT_VERSION 0x0800// DirectInput8のバージョン指定
 #include <dinput.h>
+#include"WinApp.h"
 
 //入力
 class Input
@@ -10,10 +11,10 @@ class Input
 public://メンバ関数
 	template<class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-public://メンバ関数
+
 	
 	//初期化
-	void Initialize(HINSTANCE hInstance,HWND hwnd);
+	void Initialize(WinApp* winApp);
 	//更新
 	void Update();
 
@@ -32,4 +33,9 @@ private:
 	ComPtr<IDirectInputDevice8>keyboard;
 
 	ComPtr<IDirectInput8> directInput;
+	//WindowsAPI
+	WinApp* winApp = nullptr;
+
+
+	WinApp* winApp_ = nullptr;
 };

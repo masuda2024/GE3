@@ -8,7 +8,7 @@ using namespace Microsoft::WRL;
 #pragma comment(lib,"dxguid.lib")
 
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
+void Input::Initialize(WinApp* winApp)
 {
 	HRESULT hr;
 
@@ -16,7 +16,7 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 	//ComPtr<IDirectInput8> directInput = nullptr;
 	hr = DirectInput8Create
 	(
-		hInstance, DIRECTINPUT_VERSION,
+		winApp->GetHInstance(), DIRECTINPUT_VERSION,
 		IID_IDirectInput8, (void**)&directInput,
 		nullptr
 	);
@@ -41,12 +41,14 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 	//排他制御レベルのセット
 	hr = keyboard->SetCooperativeLevel
 	(
-		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE );
+		winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	assert(SUCCEEDED(hr));
 
 	//| DICCL_NOWINKEY
 	
 
+	//借りてきたWinAppのインスタンスを記録
+	this->winApp = winApp;
 
 
 }
