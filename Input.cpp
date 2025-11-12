@@ -20,7 +20,7 @@ void Input::Initialize(WinApp* winApp)
 		IID_IDirectInput8, (void**)&directInput,
 		nullptr
 	);
-	assert(SUCCEEDED(hr));
+	//assert(SUCCEEDED(hr));
 
 
 	//キーボードデバイスの生成
@@ -30,21 +30,21 @@ void Input::Initialize(WinApp* winApp)
 		GUID_SysKeyboard, &keyboard,
 		nullptr
 	);
-	assert(SUCCEEDED(hr));
+	//assert(SUCCEEDED(hr));
 
 
 	//入力データ形式のセット
 	hr = keyboard->SetDataFormat(&c_dfDIKeyboard);//標準形式
-	assert(SUCCEEDED(hr));
+	//assert(SUCCEEDED(hr));
 
 
 	//排他制御レベルのセット
 	hr = keyboard->SetCooperativeLevel
 	(
-		winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-	assert(SUCCEEDED(hr));
+		winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	//assert(SUCCEEDED(hr));
 
-	//| DICCL_NOWINKEY
+	
 	
 
 	//借りてきたWinAppのインスタンスを記録

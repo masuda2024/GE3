@@ -35,9 +35,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include <dinput.h>
 
 
-
-#include"Input.h"
 #include"WinApp.h"
+#include"Input.h"
+
 
 
 
@@ -818,13 +818,15 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 #pragma endregion テクスチャ読み込み関連関数
 
 
+/*
+
 //ウインドウプロシージャ
 LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg,
 	WPARAM wparam, LPARAM lparam)
 {
 
-	/*ImGui::Begin("Settings");
-	ImGui::ColorEdit4("material", &materiaData->)*/
+	//ImGui::Begin("Settings");
+	//ImGui::ColorEdit4("material", &materiaData->)
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
 	{
 		return true;
@@ -845,6 +847,7 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg,
 
 }
 
+*/
 
 
 //WIndowsアプリでのエントリーポイント(main関数)
@@ -909,7 +912,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ウィンドウを表示する
 	ShowWindow(hwnd, SW_SHOW);
 */
-
+	
 //////////////
 
 //WindowsAPI///////////
@@ -920,10 +923,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	winApp = new WinApp();
 	winApp->Initialize();
 
-
-
-	
-
+	//ポインタ
+	Input* input = nullptr;
+	//入力の初期化
+	input = new Input();
+	input->Initialize(winApp);
 
 
 
@@ -1378,12 +1382,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	
 	
 	
-	//ポインタ
-	Input* input = nullptr;
-	//入力の初期化
-	input = new Input();
-	input->Initialize(winApp);
-
+	
 #pragma endregion 入力デバイス初期化
 
 
@@ -1692,6 +1691,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Windowにメッセージが来てたら最優先で処理させる
 		if (winApp->ProceccMassage())
 		{
+			//ゲームループを抜ける
+			break;
+		}
 			
 
 
@@ -1773,34 +1775,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
-			//////////////
-
-			/////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			/////
-
-
-			////////////////////
-
-
+			
 
 
 			//開発用UIの処理。実際に開発用のUIを出す場合はここをゲーム固有の処理に置き換える
@@ -1980,7 +1955,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				OutputDebugStringA("Game Loop End\n");
 				break;
 			}
-		}
+		
 	}
 
 #pragma endregion メインループ
@@ -1995,7 +1970,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	Log(ConverString(std::format(L"WSTRING{}\n", L"abc")));
 
-	return 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
 
 
 
@@ -2061,6 +2050,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//WindowAPIの終了
 	winApp->Finalize();
 	delete winApp;//WindowsAPIの解放
+
+
+return 0;
+
 
 #ifdef _DEBUG
 	debugController->Release();
