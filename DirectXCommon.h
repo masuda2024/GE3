@@ -3,20 +3,21 @@
 #include<dxgi1_6.h>
 #include<wrl.h>
 #include"WinApp.h"
+#include"Logger.h"
 class DirectXCommon
 {
 public:
 	//初期化
 	void Initialize();
 	
-	
+	void Device();
 	void Command();
 	void SwapChain();
 	void DepthBuffer();
+	void DescriptorHeap();
+	void LenderTargetView();//CG2_01_00
 	
-	
-	
-	
+	void Fence();
 	
 	//描画開始
 	void PreDraw();
@@ -34,6 +35,9 @@ private:
 
 	//WindowsAPI
 	WinApp* winApp = nullptr;
+
+	
+
 	//DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
 	//DXGIファクトリー

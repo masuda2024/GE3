@@ -1,5 +1,19 @@
 #include "DirectXCommon.h"
-//#include"WinApp.h"
+#include"Logger.h"
+#include"StringUtility.h"
+
+
+#include <cstdint>
+#include<filesystem>//ファイルやディレクトリに関するライブラリ
+#include <fstream>//ファイルに書き込み、読み込み
+#include <chrono>//時間を扱う
+
+#include<string>
+#include<format>
+
+
+
+
 
 /////****************************************/////
 
@@ -19,13 +33,121 @@ namespace Logger
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
+
+
+
+
+
 using namespace Microsoft::WRL;
+using namespace Logger;
+using namespace StringUtility;
 
 
 
-#include<string>
-#include<format>
-#include<filesystem>
+
+
+
+#include<d3d12.h>
+#include<dxgi1_6.h>
+
+
+
+
+#pragma region String
+/*
+void Log(const std::string& message)
+{
+	OutputDebugStringA(message.c_str());
+}
+
+std::wstring ConvertString(const std::string& str)
+{
+	if (str.empty())
+	{
+		return std::wstring();
+	}
+
+	auto sizeNeeded = MultiByteToWideChar
+	(
+		CP_UTF8, 0,
+		reinterpret_cast<const char*>(&str[0]),
+		static_cast<int>(str.size()),
+		NULL, 0
+	);
+
+	if (sizeNeeded == 0)
+	{
+		return std::wstring();
+	}
+
+	std::wstring result(sizeNeeded, 0);
+	MultiByteToWideChar
+	(
+		CP_UTF8, 0,
+		reinterpret_cast<const char*>(&str[0]),
+		static_cast<int>(str.size()),
+		&result[0], sizeNeeded
+	);
+
+}
+
+
+std::string ConvertString(const std::wstring& str)
+{
+	if (str.empty())
+	{
+		return std::string();
+	}
+
+	auto sizeNeeded = WideCharToMultiByte
+	(
+		CP_UTF8, 0,
+		str.data(),
+		static_cast<int>(str.size()),
+		NULL, 0, NULL, NULL
+	);
+
+	if (sizeNeeded == 0)
+	{
+		return std::string();
+	}
+
+	std::string result(sizeNeeded, 0);
+	WideCharToMultiByte
+	(
+		CP_UTF8, 0, str.data(),
+		static_cast<int>(str.size()),
+		result.data(), sizeNeeded, NULL, NULL
+	);
+
+
+	return result;
+
+}
+//string->wstring
+std::wstring ConvertString(const std::string& str);
+
+//wstring->string
+std::string ConvertString(const std::wstring& str);
+*/
+#pragma endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -96,14 +218,50 @@ ID3D12DescriptorHeap* CreateDescriptorHeap(
 }
 
 
+//デバイスの初期化
+void DirectXCommon::Device()
+{
+	HRESULT hr;
+
+	//デバッグレイヤーをオンに
+
+	//DXGIファクトリーの生成
+
+	//アダプターの列挙
+
+	//デバイス生成
+
+	//エラー時にブレークを発生させる設定
+
+
+
+}
+
+
+
 //コマンド関連の初期化
 void DirectXCommon::Command()
 {
+	HRESULT hr;
+	
 	//コマンドアロケーター生成
-
+	ID3D12CommandAllocator* commmandAllocator = nullptr;
+	hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&commmandAllocator));
+	//コマンドアロケーターの生成がうまくいなかったので起動できない
+	assert(SUCCEEDED(hr));
+	
 	//コマンドリスト生成
+	ID3D12GraphicsCommandList* commandList = nullptr;
+	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commmandAllocator, nullptr, IID_PPV_ARGS(&commandList));
+	//コマンドリストの生成がうまくいなかったので起動できない
+	assert(SUCCEEDED(hr));
 
 	//コマンドキュー生成
+	ID3D12CommandQueue* commandQueue = nullptr;
+	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
+	hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
+	//コマンドキューの生成がうまくいなかったので起動できない
+	assert(SUCCEEDED(hr));
 }
 
 //スワップチェーンの生成
@@ -148,6 +306,17 @@ void DirectXCommon::SwapChain()
 	*/
 }
 
+
+
+
+
+
+
+
+
+
+
+
 void DirectXCommon::Initialize()
 {
 	//デバイスの生成
@@ -163,111 +332,12 @@ void DirectXCommon::Initialize()
 	//メンバ変数に記録
 	this->winApp = winApp;
 
-
-
-
+	
 
 	HRESULT hr;
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	//デバイスの生成
-#pragma region デバイスの生成
 
-
-
-	//デバイスの生成がうまくいかなかったので起動できない
-	assert(device != nullptr);
-	Log("Complete create D3D12Drivice!!!\n");//初期化完了のログをだす
-
-
-
-#pragma endregion デバイスの生成
-
-	//ファクトリーの生成
-#pragma region ファクトリーの生成
-	//DXGIファクトリーの生成
-	IDXGIFactory7* dxgiFactory = nullptr;
-	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
-	assert(SUCCEEDED(hr));
-#pragma endregion ファクトリーの生成
-
-
-
-	//コマンド周りの生成
-#pragma region コマンド周りの生成
-	//コマンドキューを生成する
-	ID3D12CommandQueue* commandQueue = nullptr;
-	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
-	//コマンドキューの生成がうまくいかなかったので起動できない
-	assert(SUCCEEDED(hr));
-
-	//コマンドアロケータを生成する
-	ID3D12CommandAllocator* commandAllocator = nullptr;
-	hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-	assert(SUCCEEDED(hr));
-
-	//コマンドリストを生成する
-	ID3D12GraphicsCommandList* commandList = nullptr;
-	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr,
-		IID_PPV_ARGS(&commandList));
-	assert(SUCCEEDED(hr));
-
-
-
-
-
-	//コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
-
-
-
-#pragma endregion コマンド周りの生成
-
-
-
-
-
-
-	//デバッグレイヤーの有効化
-#pragma region デバッグレイヤーの有効化
-	//Debug();
-
-
-
-
-#ifdef _DEBUG//DEBUGはCreateWindowの直後
-
-	ID3D12Debug1* debugController = nullptr;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-	{
-		//デバックレイヤーを有効化する
-		debugController->EnableDebugLayer();
-		//さらにGPU側でもチェックを行うようにする
-		debugController->SetEnableGPUBasedValidation(TRUE);
-	}
-#endif // _DEBUG
-#pragma endregion デバッグレイヤーの有効化
-
-
-
-
-
-	
-	
-	
-	
-	
-	//アダプターの選別
-#pragma region アダプターの選別
+#pragma region アダプターの選別---CG2_00_05
 	//使用するアダブタ用の変数。最初にnullptrを入れておく
 	IDXGIAdapter4* useAdapter = nullptr;
 	//よい順にアダブタを頼む
@@ -282,7 +352,7 @@ void DirectXCommon::Initialize()
 		//ソフトウェアアダブタでなければ採用!
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE))
 		{
-			Log(ConverString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));//ここのエラーは、0-5の補足教材にある
+			Log(ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));//ここのエラーは、0-5の補足教材にある
 			break;
 		}
 		useAdapter = nullptr;
@@ -310,12 +380,146 @@ void DirectXCommon::Initialize()
 		}
 	}
 #pragma endregion アダプターの選別
+
+#pragma region デバイスの生成---CG2_00_05
+
+	ID3D12Device* device = nullptr;
+	//機能レベルとログ出力用の文字列
+	D3D_FEATURE_LEVEL featrueLevels[] =
+	{
+		D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
+	};
+	const char* featureLevelStrings[] = { "12.2","12.1","12.0" };
+	//高い順に生成できるか試していく
+	for (size_t i = 0; i < _countof(featrueLevels); i++)
+	{
+		//採用したアダプターでデバイスを生成
+		hr = D3D12CreateDevice(useAdapter, featrueLevels[i], IID_PPV_ARGS(&device));
+		//指定した機能レベルでデバイスが生成できたかを確認
+		if (SUCCEEDED(hr))
+		{
+			//生成できたのでログ出力を行ってループを抜ける
+			Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			break;
+		}
+	}
+	//デバイスの生成がうまくいかなかったので起動できない
+	assert(device != nullptr);
+	Log("Complete create D3D12Drivice!!!\n");//初期化完了のログをだす
+
+#pragma endregion デバイスの生成
+
+#pragma region コマンド周りの生成---CG2_01_00
+	//コマンドキューを生成する
+	ID3D12CommandQueue* commandQueue = nullptr;
+	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
+	hr = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
+	//コマンドキューの生成がうまくいかなかったので起動できない
+	assert(SUCCEEDED(hr));
+
+	//コマンドアロケータを生成する
+	ID3D12CommandAllocator* commandAllocator = nullptr;
+	hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
+	assert(SUCCEEDED(hr));
+
+	//コマンドリストを生成する
+	ID3D12GraphicsCommandList* commandList = nullptr;
+	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr,
+		IID_PPV_ARGS(&commandList));
+	assert(SUCCEEDED(hr));
+
+	
+
+
+#pragma endregion コマンド周りの生成
+
+#pragma region スワップチェーンの生成---CG2_01_00
+
+	//スワップチェーンを生成する
+	IDXGISwapChain4* swapChain = nullptr;
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
+	swapChainDesc.Width = WinApp::kClientWidth;//画面の幅。ウインドウのクライアント領域を同じものにしておく
+	swapChainDesc.Height = WinApp::kClientHeight;//画面の高さ。ウインドウもクライアント領域を同じものにしておく
+	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//色の形式
+	swapChainDesc.SampleDesc.Count = 1;//マルチサンプルしない
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;//描画のターゲットとして利用する
+	swapChainDesc.BufferCount = 2;//ダブルバッファ
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;//モニターに映したら、中身を破棄
+	//コマンドキュー、ウィンドウハンドル、設定を渡して生成する
+	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
+	assert(SUCCEEDED(hr));
+
+#pragma endregion スワップチェーンの生成
+
+
+
+	
+#pragma region 深度バッファ(Zバッファ)の生成---CG2_03_01
+
+
+
+
+
+
+#pragma endregion 深度バッファ(Zバッファ)の生成
+
+
+
+
+	
+
+
+
+
+
+
+
+#pragma region ファクトリーの生成
+	//DXGIファクトリーの生成
+	IDXGIFactory7* dxgiFactory = nullptr;
+	//関数が成功したかどうかをSUCCEEDEDマクロで判定できる
+	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
+	//初期化の根本的な部分でエラーが出た場合はプログラムが間違っているか、
+	//どうにもできない場合が多いのでassertにしておく
+	assert(SUCCEEDED(hr));
+#pragma endregion ファクトリーの生成
+
+#pragma region デバッグレイヤーの有効化
+	//Debug();
+
+
+
+
+#ifdef _DEBUG//DEBUGはCreateWindowの直後
+
+	ID3D12Debug1* debugController = nullptr;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+	{
+		//デバックレイヤーを有効化する
+		debugController->EnableDebugLayer();
+		//さらにGPU側でもチェックを行うようにする
+		debugController->SetEnableGPUBasedValidation(TRUE);
+	}
+#endif // _DEBUG
+#pragma endregion デバッグレイヤーの有効化
 	
 	
 	
 	
 	
-	//エラーの設定
+	//アダプターの選別
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 #pragma region エラーの設定
 
 
@@ -350,36 +554,11 @@ void DirectXCommon::Initialize()
 		infoQueue->Release();
 	}
 #endif // DEBUG
-#pragma endregion エラーの設定
-
-
-
-
-
-
-
-	//スワップチェーンの生成
-#pragma region スワップチェーンの生成
+#pragma endregion エラーの設定	
 	
-
-
-
-	//スワップチェーンを生成する
-	IDXGISwapChain4* swapChain = nullptr;
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-	swapChainDesc.Width = WinApp::kClientWidth;
-	swapChainDesc.Height = WinApp::kClientHeight;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.SampleDesc.Count = 1;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = 2;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-
-	//コマンドキュー、ウィンドウハンドル、設定を渡して生成する
-	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
-
-
-#pragma endregion スワップチェーンの生成
+	
+	
+	
 	// スワップチェーン用リソースの
 #pragma region スワップチェーン用リソースの生成
 	//SwapChainからResourceを引っ張ってくる
@@ -406,18 +585,19 @@ void DirectXCommon::Initialize()
 
 
 
+	
+#pragma region ディスクリプタヒープの生成---CG2_02_03
+	
+
+
 	//ディスクリプタヒープの生成
-#pragma region ディスクリプタヒープの生成
-	
-
-
-	
-		
-
-
-
-
-
+	ID3D12DescriptorHeap* trvDescriptorHeap = nullptr;
+	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
+	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;//レンダーターゲットビュー用
+	rtvDescriptorHeapDesc.NumDescriptors = 2;//ダブルバッファ用に2つ多くても別に構わない
+	hr = device->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeapDesc));
+	//ディスクリプタヒープが作れなかったので起動できない
+	assert(SUCCEEDED(hr));
 
 
 
@@ -445,22 +625,21 @@ void DirectXCommon::Initialize()
 
 
 
-	//Febceの生成
+	//Fenceの生成
 	//ビューポート矩形の初期化
 	//シザリング矩形の生成
 	//DCXコンパイラの生成
 	//ImGuiの初期化
 
 
-	//深度バッファの生成
-#pragma region 深度バッファの生成
 
-
-
-
-
-
-#pragma endregion 深度バッファの生成
+	
+	
+	
+	
+	
+	
+	
 	//深度バッファのテクスチャ生成
 #pragma region 深度バッファのテクスチャ生成
 
@@ -521,8 +700,8 @@ void DirectXCommon::Initialize()
 
 
 
-	//Febceの生成
-#pragma region Febceの生成
+	
+#pragma region Febceの生成---CG2_01_02
 	//初期値0でFenceを作る
 	ID3D12Fence* fence = nullptr;
 	uint64_t fenceValue = 0;
@@ -533,8 +712,16 @@ void DirectXCommon::Initialize()
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 #pragma endregion Febceの生成
+	
+	
+	
+	
+	
+	
+	
+	
 	//ビューポート矩形の初期化
-#pragma region ビューポート矩形の初期化
+#pragma region ビューポート矩形の初期化---CG2_02_00
 	//ビューボート
 	D3D12_VIEWPORT viewport{};
 	//クライアント領域のサイズと一緒にして画面全体に表示
@@ -545,8 +732,12 @@ void DirectXCommon::Initialize()
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 #pragma endregion ビューポート矩形の初期化
+	
+	
+	
+	
 	//シザリング矩形の生成
-#pragma region シザリング矩形の生成
+#pragma region シザリング矩形の生成---CG2_02_00
 	//ｼｻﾞｰ短形
 	D3D12_RECT scissorRect{};
 	//基本的にビューボートと同じ短形が構成されるようにする
@@ -555,6 +746,11 @@ void DirectXCommon::Initialize()
 	scissorRect.top = 0;
 	scissorRect.bottom = WinApp::kClientHeight;
 #pragma endregion シザリング矩形の生成
+	
+	
+	
+	
+	
 	//DCXコンパイラの生成
 #pragma region DCXコンパイラの生成
 	//dxcCompilerを初期化
