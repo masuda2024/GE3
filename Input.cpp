@@ -55,17 +55,17 @@ void Input::Initialize(WinApp* winApp)
 
 void Input::Update()
 {
-	HRESULT hr;
+	
 
 	//前回のキー入力を保存
 	memcpy(keyPre, key, sizeof(key));
 
 
 	//キーボード入力情報取得開始
-	hr = keyboard->Acquire();
+	keyboard->Acquire();
 	//全キーの入力情報を取得する
 	//BYTE key[256] = {};
-	hr = keyboard->GetDeviceState(sizeof(key), key);
+	keyboard->GetDeviceState(sizeof(key), key);
 }
 
 bool Input::TriggerKey(BYTE keyNumber)

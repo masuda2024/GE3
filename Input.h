@@ -28,6 +28,8 @@ public://メンバ関数
 	bool TriggerKey(BYTE keyNumber);
 
 	bool PushKey(BYTE keyNumber);
+
+
 private:
 	//キーボードのデバイス
 	ComPtr<IDirectInputDevice8>keyboard;
