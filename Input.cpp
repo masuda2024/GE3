@@ -2,7 +2,7 @@
 #include<cassert>
 #include<wrl.h>
 using namespace Microsoft::WRL;
-//#define DIRECTINPUT_VERSION 0x0800// DirectInput8のバージョン指定
+#define DIRECTINPUT_VERSION 0x0800// DirectInput8のバージョン指定
 //#include <dinput.h>
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -41,7 +41,8 @@ void Input::Initialize(WinApp* winApp)
 	//排他制御レベルのセット
 	hr = keyboard->SetCooperativeLevel
 	(
-		winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+		winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY
+	);
 	//assert(SUCCEEDED(hr));
 
 	
