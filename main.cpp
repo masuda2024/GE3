@@ -28,7 +28,6 @@
 
 #include "Vector2.h"
 #include "Vector4.h"
-#include <dbghelp.h>
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -46,11 +45,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #include "externals/DirectXTex-mar2023/DirectXTex/DirectXTex.h"
 
-
-#include<fstream>
-#include<sstream>
 #include <minidumpapiset.h>
-#include <xaudio2.h>
+
 using namespace MatrixMath;
 #pragma region 構造体
 
@@ -180,7 +176,7 @@ Vector3 Normalize(const Vector3& v)
 		return { 0.0f, 0.0f, 0.0f };
 	return { v.x / length, v.y / length, v.z / length };
 }
-
+#pragma region SRT行列
 Matrix4x4 MakeScaleMatrix(const Vector3& scale)
 {
 	Matrix4x4 result = {};
@@ -259,7 +255,7 @@ Matrix4x4 MakeTranslateMatrix(const Vector3& translate)
 	result.m[3][3] = 1.0f;
 	return result;
 }
-
+#pragma endregion
 
 #pragma region log関数
 
@@ -308,9 +304,6 @@ std::string ConvertString(const std::wstring& str)
 
 #pragma endregion
 
-#pragma region ウィンドウ関数
-
-#pragma endregion
 
 
 
@@ -1429,18 +1422,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Matrix4x4 worldViewProjectionMatrix = Multipty(worldMatrix, Multipty(viewMatrix, projectionMatrix));
 		wvpData->WVP = worldViewProjectionMatrix;
 
+
+
+
+
 		// Sprite
 		Matrix4x4 worldMatrixSprite = MakeAffine(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 		Matrix4x4 viewMatrixSprite = MatrixMath::MakeIdentity4x4();
 		Matrix4x4 projectionMatrixSprite = Orthographic(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 		Matrix4x4 worldViewProjectionMatrixSprite = Multipty(worldMatrixSprite, Multipty(viewMatrixSprite, projectionMatrixSprite));
 		*transformationMatirxDataSprite = worldViewProjectionMatrixSprite;
+		
+
+
+
 
 
 		bool temp_enableLightFlag = (materialData->enableLighting == 1);
 
 		directionalLightData->direction = Normalize(directionalLightData->direction);
-
+#pragma region ImGui
 		ImGui::Begin("Settings");
 
 		ImGui::ColorEdit4("Color", &materialData->color.x);
@@ -1462,8 +1463,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-
-
+#pragma endregion
+#pragma region キーを押して出力
 		//数字の0キーが押されていたら
 		//if (key[DIK_0])
 		//{
@@ -1501,6 +1502,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			OutputDebugStringA("Hit 0\n");//出力ウィンドウに「Hit 0」と表示
 			transformSprite.translate.x += 5.0f;
 		}
+#pragma endregion
 
 #pragma region UVTransform
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
@@ -1526,7 +1528,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// 形状を設定。PSOに設定しているものとは別。同じものを設定すると考えておけば良い
 		dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-#pragma region sphereの描画
+
+		 //  [][][][]
+		 // [][][][][]
+		 // [][][][][]
+		 //  [][][][]
+		 // 
+		 //     []
+		 //    [][]
+		 //   [][][]
+		 //  [][][][]
+		 // [][][][][]
+		 // 
+		 // 
+		 //         []
+		 //         []
+		 // [][][][][]
+		 //          []
+		 //           []
+		 //
+		 // [][][][][]
+		 // [][][][][]
+		 // [][][][][]
+		 // [][][][][]
+		 // [][][][][]
+		 //
+		 // 
+		 // [][][]
+		 // [][][]
+		 // [][][]
+		 //       [][][]
+		 //      [][][]]
+		 //      [][][]]
+		 //      [][][] 
+		 // 
+		 //
+#pragma region モデルの描画
 		// wvp用のCBufferの場所を設定
 		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 		dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
@@ -1537,27 +1574,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-		// 描画！(DraoCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
-		//xCommon->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
+		//描画 (下記のコマンドリストを"//"でON-OFFできる),(DraoCall/ドローコール)。3頂点で1つのインスタンス。インスタンスについては今後
+		//dxCommon->GetCommandList()->DrawIndexedInstanced(indexCount, 1, 0, 0, 0);
 		dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 #pragma endregion
 
 
-		// Spriteの描画
+		 
+		// [][][][][][][][][]
+		// [][][][][][][][][]
+		// [][][][][][][][][]
+		// [][][][][][][][][]
+		// [][][][][][][][][]
+#pragma region Spriteの描画
 		dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 		dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSprite); // VBVを設定
+		
 		// マテリアルCBuffer
 		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
-		// 描画！(DraoCall/ドローコール)
+		//描画 (下記のコマンドリストを"//"でON-OFFできる),(DraoCall/ドローコール)
 		dxCommon->GetCommandList()->DrawInstanced(6, 1, 0, 0);
 
 
 		dxCommon->GetCommandList()->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
 
-		//描画!(DrawCall/ドローコー)6個のインデックスを使用し1つのインスタンスを描画。その他は当面0で良い
+		////描画 (下記のコマンドリストを"//"でON-OFFできる),(DrawCall/ドローコー)6個のインデックスを使用し1つのインスタンスを描画。その他は当面0で良い
 		dxCommon->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
+#pragma endregion
+
+
 
 
 		// 実際のcommandListのImGuiの描画コマンドを積む
