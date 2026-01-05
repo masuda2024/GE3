@@ -55,21 +55,17 @@ public://メンバ関数
 	void CreateDXCCompiler();
 
 	void InitializeImGui();
-	/// --- 描画前処理 ---
+	//描画前処理
 	void PreDraw();
-	/// --- 描画後処理 ---
+	//描画後処理
 	void PostDraw();
 
-	//// --- Getter ---
-	ID3D12Device* GetDevice() 
-	{
-		return device.Get(); 
-	}
-	ID3D12GraphicsCommandList* GetCommandList()
-	{ 
-		return commandList.Get(); 
-	}
+	//Getter
+	ID3D12Device* GetDevice() {return device.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList()const { return commandList.Get(); }
 
+
+	//シェーダーのコンパイル
 	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader
 	(
 		// CompilerするShaderファイルへのパス
@@ -77,13 +73,13 @@ public://メンバ関数
 		// Compilerに仕様するProfile
 		const wchar_t* profile
 	);
-
+	//バッファリソースの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
-
+	//テクスチャリソースの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource>CreateTextureResource(const DirectX::TexMetadata& metadata);
-
+	//テクスチャデータの転送
 	Microsoft::WRL::ComPtr<ID3D12Resource>UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
-
+	//テクスチャファイルの読み込み
 	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
 private:
