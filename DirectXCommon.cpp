@@ -27,6 +27,7 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	assert(winApp);
 	this->winApp = winApp;
 
+
 	InitializeFixFPS();
 	//デバイスの生成
 	Deviceinitialize();
@@ -50,6 +51,8 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	CreateDXCCompiler();
 	//ImGuiの初期化
 	InitializeImGui();
+
+	
 }
 
 
@@ -468,6 +471,7 @@ void DirectXCommon::PostDraw()
 	Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { commandList };
 	commandQueue->ExecuteCommandLists(1, commandLists->GetAddressOf());
 
+	//FPS固定
 	UpdateFixFPS();
 
 	//GPUとOSに画面交換を行うように通知
@@ -680,7 +684,7 @@ void DirectXCommon::InitializeFixFPS()
 void DirectXCommon::UpdateFixFPS()
 {
 	// 1/60秒ピッタリの時間
-	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
+	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 30.0f));
 	// 1/60秒よりわずかに短い時間
 	const std::chrono::microseconds kMinCheckTime(uint64_t(1000000.0f / 65.0f));
 
@@ -699,5 +703,6 @@ void DirectXCommon::UpdateFixFPS()
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
 	}
+	//現在の時間を記録する
 	reference_ = std::chrono::steady_clock::now();
 }
