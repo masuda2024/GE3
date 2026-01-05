@@ -684,7 +684,7 @@ void DirectXCommon::InitializeFixFPS()
 void DirectXCommon::UpdateFixFPS()
 {
 	// 1/60秒ピッタリの時間
-	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 30.0f));
+	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
 	// 1/60秒よりわずかに短い時間
 	const std::chrono::microseconds kMinCheckTime(uint64_t(1000000.0f / 65.0f));
 
