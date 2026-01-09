@@ -1092,7 +1092,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region ModelDataを使う
 	//ModelDataを使う
 	//モデルの読み込み
-	ModelData modelData = LoadObjFile("resources", "axis.obj");
+	
+	
+
+
+	// [][][][][]
+	// [][][][][]
+	// [][][][][]
+	// [][][][][]
+	// [][][][][]
+	ModelData modelData = LoadObjFile("resources", "plane.obj");
+
+
+
+
+	//         []
+    //         []
+    // [][][][][]
+    //          []
+    //           []
+    //ModelData modelData = LoadObjFile("resources", "axis.obj");
+	
+
+	// [][][]
+	// [][][]
+	// [][][]
+	//       [][][]
+	//      [][][]]
+	//      [][][]]
+	//      [][][] 
+	//ModelData modelData = LoadObjFile("resources", "multiMesh.obj");
+	//ModelData modelData = LoadObjFile("resources", "multiMaterial.obj");
+	
+	
+	
+	
+	
+	
 
 	//頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = dxCommon->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
@@ -1442,14 +1478,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		directionalLightData->direction = Normalize(directionalLightData->direction);
 #pragma region ImGui
+
 		ImGui::Begin("Settings");
 
 		ImGui::ColorEdit4("Color", &materialData->color.x);
 		ImGui::SliderAngle("RotateX", &transformSprite.rotate.x, -500, 500);
 		ImGui::SliderAngle("RotateY", &transformSprite.rotate.y, -500, 500);
 		ImGui::SliderAngle("RotateZ", &transformSprite.rotate.z, -500, 500);
-		ImGui::DragFloat3("transform", &transformSprite.translate.x, -180, 180);
-		ImGui::DragFloat3("transformsphere", &transform.translate.x);
+		ImGui::DragFloat3("transform-Sprite", &transformSprite.translate.x, -180, 180);
+		ImGui::DragFloat3("transform-Sphere", &transform.translate.x);
 		ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
 		ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
 		ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
@@ -1463,6 +1500,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+
+		ImGui::End();
+
+
 #pragma endregion
 #pragma region キーを押して出力
 		//数字の0キーが押されていたら
@@ -1512,7 +1553,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 #pragma endregion
 
-		ImGui::End();
+		
 
 		// ImGuiの内部コマンドを生成する
 		ImGui::Render();
