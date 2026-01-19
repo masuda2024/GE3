@@ -96,7 +96,16 @@ Transform uvTransformSprite
 	{0.0f,0.0f,0.0f},
 	{0.0f,0.0f,0.0f}
 };
-
+//      Oo
+	//   [>[二]
+	//
+	//
+Transform cameraTransform
+{
+	{1.0f,1.0f,1.0f},
+	{0.0f,0.0f,0.0f},
+	{0.0f,0.0f,-15.0f}
+};
 struct Material
 {
 	Vector4 color;
@@ -1437,7 +1446,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 #pragma endregion
 
-	bool useMonsterBall = false;
+	
+
+
+
+	bool cameraReset = false;
+
+#pragma region Sprite
+
+	bool drawSprite = true;
+	bool spriteReset = false;
+
+	bool autoSpriteRotateX = false;
+	bool autoSpriteRotateY = false;
+	bool autoSpriteRotateZ = false;
+
+#pragma endregion
+
+
+#pragma region Model
+
+	bool drawModel = true;
+	bool ModelReset = false;
+
+	//テクスチャをモンスターボールに切り替える
+	bool useMonsterBall = true;
+
+
+	bool autoModelRotateX = false;
+	bool autoModelRotateY = false;
+	bool autoModelRotateZ = false;
+
+#pragma endregion
+
+
+
+
 
 
 	while (true) 
@@ -1503,12 +1547,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		ImGui::Begin("Settings");
 
+
+		ImGui::Begin("Camera");
+		ImGui::Checkbox("CameraReset", &cameraReset);
+		ImGui::DragFloat3("Transform", &cameraTransform.translate.x, 0.1f);
+		ImGui::End();
+
+
+
+		ImGui::Begin("Sprite");
+		ImGui::Checkbox("SpriteReset", &spriteReset);
+		ImGui::Checkbox("DrawSprite", &drawSprite);
+		ImGui::ColorEdit4("material", &materialData->color.x, ImGuiColorEditFlags_AlphaPreview);
 		ImGui::ColorEdit4("Color", &materialData->color.x);
+		ImGui::DragFloat3("Transform", &transformSprite.translate.x, -180, 180);
+		ImGui::DragFloat3("Transform", &transform.translate.x);
 		ImGui::SliderAngle("RotateX", &transformSprite.rotate.x, -500, 500);
 		ImGui::SliderAngle("RotateY", &transformSprite.rotate.y, -500, 500);
 		ImGui::SliderAngle("RotateZ", &transformSprite.rotate.z, -500, 500);
-		ImGui::DragFloat3("transform-Sprite", &transformSprite.translate.x, -180, 180);
-		ImGui::DragFloat3("transform-Sphere", &transform.translate.x);
+		ImGui::End();
+
+
+
+		
 		ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
 		ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
 		ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
