@@ -1545,7 +1545,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		directionalLightData->direction = Normalize(directionalLightData->direction);
 #pragma region ImGui
 
-		ImGui::Begin("Settings");
+		
 
 
 		ImGui::Begin("Camera");
@@ -1559,32 +1559,80 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::Checkbox("SpriteReset", &spriteReset);
 		ImGui::Checkbox("DrawSprite", &drawSprite);
 		ImGui::ColorEdit4("material", &materialData->color.x, ImGuiColorEditFlags_AlphaPreview);
-		ImGui::ColorEdit4("Color", &materialData->color.x);
+		//ImGui::ColorEdit4("Color", &materialData->color.x);
 		ImGui::DragFloat3("Transform", &transformSprite.translate.x, -180, 180);
-		ImGui::DragFloat3("Transform", &transform.translate.x);
 		ImGui::SliderAngle("RotateX", &transformSprite.rotate.x, -500, 500);
 		ImGui::SliderAngle("RotateY", &transformSprite.rotate.y, -500, 500);
 		ImGui::SliderAngle("RotateZ", &transformSprite.rotate.z, -500, 500);
 		ImGui::End();
 
-
-
-		
+		ImGui::Begin("Model");
+		ImGui::DragFloat3("Transform", &transform.translate.x);
 		ImGui::SliderAngle("SphereRotateX", &transform.rotate.x);
 		ImGui::SliderAngle("SphereRotateY", &transform.rotate.y);
 		ImGui::SliderAngle("SphereRotateZ", &transform.rotate.z);
 		ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-		if (ImGui::Checkbox("enableLightFlag", &temp_enableLightFlag)) 
+		if (ImGui::Checkbox("enableLightFlag", &temp_enableLightFlag))
 		{
 			materialData->enableLighting = temp_enableLightFlag ? 1 : 0;
 		}
 		ImGui::SliderFloat3("Light", &directionalLightData->direction.x, -1.0f, 0.8f);
-
+		ImGui::End();
+		
+		ImGui::Begin("Settings");
+		
 		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 
 		ImGui::End();
+
+
+
+
+
+#pragma region Sprite
+
+
+		if (spriteReset)
+		{
+			transformSprite.translate = { 0.0f,0.0f,0.0f };
+			transformSprite.rotate = { 0.0f,0.0f,0.0f };
+			transformSprite.scale = { 1.0f,1.0f,1.0f };
+			spriteReset = false;
+			autoSpriteRotateX = false;
+			autoSpriteRotateY = false;
+			autoSpriteRotateZ = false;
+		}
+
+		//自動回転
+		if (autoSpriteRotateX)
+		{
+			transformSprite.rotate.x += 0.03f;
+		}
+
+		if (autoSpriteRotateY)
+		{
+			transformSprite.rotate.y += 0.03f;
+		}
+
+		if (autoSpriteRotateZ)
+		{
+			transformSprite.rotate.z += 0.03f;
+		}
+
+#pragma endregion
+
+
+
+
+
+
+
+
+
+
+
 
 
 #pragma endregion
